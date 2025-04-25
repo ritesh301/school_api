@@ -1,6 +1,7 @@
 const db = require('../db');
 const getDistance = require('../utils/distance');
 
+// Add School API
 exports.addSchool = async (req, res) => {
   const { name, address, latitude, longitude } = req.body;
 
@@ -19,20 +20,32 @@ exports.addSchool = async (req, res) => {
   }
 };
 
+// List Schools API
 exports.listSchools = async (req, res) => {
-  const { latitude, longitude } = req.query;
+  // ✅ Convert user query input to float
+  const userLat = parseFloat(req.query.latitude);
+  const userLon = parseFloat(req.query.longitude);
 
-  if (isNaN(latitude) || isNaN(longitude)) {
+  if (isNaN(userLat) || isNaN(userLon)) {
     return res.status(400).json({ error: 'Invalid coordinates' });
   }
 
   try {
     const [schools] = await db.execute('SELECT * FROM schools');
+
+    // ✅ Parse each school's lat/lon to float before calculating distance
     const sorted = schools
-      .map((school) => ({
-        ...school,
-        distance: getDistance(latitude, longitude, school.latitude, school.longitude),
-      }))
+      .map((school) => {
+        const schoolLat = parseFloat(school.latitude);
+        const schoolLon = parseFloat(school.longitude);
+
+        const distance = getDistance(userLat, userLon, schoolLat, schoolLon);
+
+        return {
+          ...school,
+          distance
+        };
+      })
       .sort((a, b) => a.distance - b.distance);
 
     res.json(sorted);
