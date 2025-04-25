@@ -11,7 +11,7 @@ exports.addSchool = async (req, res) => {
 
   try {
     await db.execute(
-      'INSERT INTO schools (name, address, latitude, longitude) VALUES (?, ?, ?, ?)',
+      'INSERT INTO school (name, address, latitude, longitude) VALUES (?, ?, ?, ?)',
       [name, address, latitude, longitude]
     );
     res.status(201).json({ message: 'School added successfully' });
@@ -31,10 +31,10 @@ exports.listSchools = async (req, res) => {
   }
 
   try {
-    const [schools] = await db.execute('SELECT * FROM schools');
+    const [school] = await db.execute('SELECT * FROM school');
 
     // ✅ Parse each school's lat/lon to float before calculating distance
-    const sorted = schools
+    const sorted = school
       .map((school) => {
         const schoolLat = parseFloat(school.latitude);
         const schoolLon = parseFloat(school.longitude);
